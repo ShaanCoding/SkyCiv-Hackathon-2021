@@ -50,49 +50,19 @@ while (numberOfContours != ideal_contour_number):
 # Made a mask for nodes
 print(contours_number_array)
 print(coutner_index)
-
-mask_eroded = cv2.erode(mask, kernel, iterations = coutner_index)
-
-
-#create an empty image for contours
-# img_contours = np.zeros(image.shape)
-# # draw the contours on the empty image
-# cv2.drawContours(img_contours, contours, -1, (0,255,0), 3)
-# #save image
-# cv2.imwrite('./contours.png',img_contours) 
+graph_node = cv2.erode(mask, kernel, iterations = coutner_index)
+# Need to dialiate to original size
+graph_node = cv2.dilate(graph_node, kernel, iterations = coutner_index + 1)
+graph_edges = mask - graph_node
 
 # # Shows image
 cv2.imshow("Example", mask)
-cv2.imshow("Example Eroded", mask_eroded)
+cv2.imshow("Graph Node Mask", graph_node)
+cv2.imshow("Graph Node Edges", graph_edges)
 
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
-# Break down to either node or edge
-# Can be processed independently to detect different features (e.g. color, shape, edge bends, etc)
-
-# Breaking it apart
-
-# Seperate it into nodes & edge
-# Simplifies it, this is important but there's no main way to split them
-
-# Morphology based segmentation
-
-# Change to binary
-# Grayscale to B/W
-# outermost contour in the image and assume this is the foreground (i.e graph) contour is inital mask
-
-# Then we remove edghes by running multiple erode bypasses
-# After multiple erosions (which trims a big feature) nodes will shrink whilst edges will be deleted
-# Once done, we run opencv findContours() to detect node
-# Given node contours, we can create an edge mask which can detect our edge regions of our segment
-
-# how to erode imageu until all edges are removed?
-# depends on thickness of edge, heuristic
-# at some point edges will dissapear and nodes now form their own contours
-
-# bascially we repeat until contours number stablizes and we get the min number of eroisions
 
 # Node labels
 
