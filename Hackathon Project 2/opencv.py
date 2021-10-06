@@ -1,11 +1,72 @@
 import cv2
+from PIL import Image
+import numpy as np
 
-image = cv2.imread("./test-image.png", cv2.IMREAD_COLOR)
+image = cv2.imread("./test-image-2.png", cv2.COLOR_BGR2RGB)
+pil_image = Image.fromarray(image)
+quantizedImage = pil_image.quantize(3)
+quantizedImageCV2 = np.asarray(pil_image)
+# convert to grayscale
+gray = cv2.cvtColor(quantizedImageCV2, cv2.COLOR_BGR2GRAY)
+(thresh, black_white) = cv2.threshold(gray, 126, 255, cv2.THRESH_BINARY)
 
-cv2.imshow("Example", image)
+# Getting white mask
+mask = cv2.bitwise_not(black_white)
+
+# Now we need to remove edges by making node mask, we erode heuristically until it stabilizes the amount of contours
+
+kernel = np.ones((5, 5), np.uint8)
+
+contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+numberOfContours = len(contours)
+
+iteration = 0
+contours_number_array = []
+
+while (numberOfContours > 0):
+    mask_eroded = cv2.erode(mask, kernel, iterations = iteration)
+    contours, hierarchy = cv2.findContours(mask_eroded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    numberOfContours = len(contours)
+    contours_number_array.append(numberOfContours)
+    iteration += 1
+
+ideal_contour_number = max(set(contours_number_array), key = contours_number_array.count)
+
+contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+coutner_index = 0
+iteration = 0
+numberOfContours = len(contours)
+
+while (numberOfContours != ideal_contour_number):
+    mask_eroded = cv2.erode(mask, kernel, iterations = iteration)
+    contours, hierarchy = cv2.findContours(mask_eroded, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    numberOfContours = len(contours)
+    if(numberOfContours == ideal_contour_number):
+        coutner_index = iteration
+    else:
+        iteration += 1
+
+
+# Made a mask for nodes
+print(contours_number_array)
+print(coutner_index)
+
+mask_eroded = cv2.erode(mask, kernel, iterations = coutner_index)
+
+
+#create an empty image for contours
+# img_contours = np.zeros(image.shape)
+# # draw the contours on the empty image
+# cv2.drawContours(img_contours, contours, -1, (0,255,0), 3)
+# #save image
+# cv2.imwrite('./contours.png',img_contours) 
+
+# # Shows image
+cv2.imshow("Example", mask)
+cv2.imshow("Example Eroded", mask_eroded)
+
 
 cv2.waitKey(0)
-
 cv2.destroyAllWindows()
 
 # Break down to either node or edge

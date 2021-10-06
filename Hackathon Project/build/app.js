@@ -1,9 +1,9 @@
 jQuery(document).ready(function () {
-  const app_id = "my_cool_app";
+  const app_id = "report_generator";
 
   const config = {
     id: app_id, // The ID must be unique amongst other apps.
-    name: "Hello SkyCiv Apps",
+    name: "SkyCiv Report Generator",
     width: "600px",
     height: "600px",
     icon_img:
@@ -33,11 +33,6 @@ jQuery(document).ready(function () {
         text-align: center;
         color: black;
       }
-      .info-coolapp {
-        border: 2px solid #289dcc;
-        padding: 12px;
-        border-radius: 4px;
-      }
     </style>
   </head>
 
@@ -52,28 +47,7 @@ jQuery(document).ready(function () {
         Notify
       </button>
 
-      <br />
-
-      <button
-        class="ui button primary"
-        onclick="SKYCIV_APPS.${app_id}.secondCustomFunction()"
-      >
-        Screenshot
-      </button>
-      <br />
-
-      <p>Click screenshot to show an image</p>
-      <img id="screenshot" alt="S3D Screenshot" />
-      <br />
-
-      <div class="info-coolapp">
-        <p>
-          S3D uses
-          <a href="https://semantic-ui.com/">Semantic UI</a> and
-          <a href="https://jquery.com/">jQuery</a>.
-        </p>
-        <p>This may help you build your own user interface!</p>
-      </div>
+      
     </main>
   </body>
 </html>
@@ -81,9 +55,6 @@ jQuery(document).ready(function () {
     onInit: function () {
       // This is called when the page loads the app.
       console.log("App has been initalised");
-
-      // Hide the empty img element using jQuery.
-      $("#screenshot").hide();
     },
     onFirstOpen: function () {
       // This is called on the first open of the App in the current S3D session.
