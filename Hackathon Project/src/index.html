@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <link
+      href="https://dev.skyciv.com/assets/res/semantic/semantic.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <style>
+      /*Give your classes a unique suffix to ensure they dont interfere with existing styles*/
+      .main-coolapp {
+        /* Flex column to make all children stack downward */
+        display: flex;
+        flex-direction: column;
+        /*Margin auto to center the main container*/
+        margin: auto;
+        /* Stop container getting too wide */
+        max-width: 400px;
+      }
+      .h1-coolapp {
+        text-align: center;
+        color: black;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="main-coolapp">
+      <h1 class="h1-coolapp">Hello SkyCiv Apps</h1>
+
+      <button
+        class="ui button"
+        onclick="SKYCIV_APPS.${app_id}.customFunction()"
+      >
+        Notify
+      </button>
+
+      
+    </main>
+  </body>
+</html>
