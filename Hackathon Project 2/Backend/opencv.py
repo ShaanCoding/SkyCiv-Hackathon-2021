@@ -4,7 +4,7 @@ import numpy as np
 from skimage.morphology import skeletonize
 
 def main():
-    image = cv2.imread("./test-image-3.png")
+    image = cv2.imread("./test.png")
 
     # Preprocessing
     pil_image = Image.fromarray(image)
@@ -33,9 +33,42 @@ def main():
     
     (graph_edges_parsed, endpoints_list) = find_edges_endpoints(graph_edges, graph_node)
 
+    graph_edges_to_index = []
+
+    for i in range(0, len(endpoints_list)):
+        # Can't be the same node
+        closest_node_one = find_closest_node(endpoints_list[i][0], contours_array_coordinate, -1)
+        closest_node_two = find_closest_node(endpoints_list[i][1], contours_array_coordinate, closest_node_one) + 1
+        graph_edges_to_index.append((closest_node_one, closest_node_two))
+
     print("Node Coordinate List", contours_array_coordinate)
-    print("Contours Type:", contours_array_type)
-    print("Endpoint list", endpoints_list)
+    print("")
+    print("Node Edges Index", graph_edges_to_index)
+    
+    blank_image = np.zeros(image.shape, np.uint8)
+
+    for i in range(0, len(graph_edges_to_index)):
+        graph_edges_index_one = graph_edges_to_index[i]
+        cv2.line(blank_image, contours_array_coordinate[graph_edges_index_one[0]], contours_array_coordinate[graph_edges_index_one[1]], color=(255, 255, 132), thickness=5)
+
+    for i in range(0, len(contours_array_coordinate)):
+        cv2.circle(blank_image, contours_array_coordinate[i], radius=2, color=(77,166,255), thickness=2)
+        cv2.putText(blank_image, "Index: " + str(i), contours_array_coordinate[i], cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+
+        # TEXT_FACE = cv2.FONT_HERSHEY_DUPLEX
+        # TEXT_SCALE = 1.5
+        # TEXT_THICKNESS = 2
+        # TEXT = "0"
+        # text_size, _ = cv2.getTextSize(TEXT, TEXT_FACE, TEXT_SCALE, TEXT_THICKNESS)
+        # text_origin = (CENTER[0] - text_size[0] / 2, CENTER[1] + text_size[1] / 2)
+        # cv2.putText(img, TEXT, text_origin, TEXT_FACE, TEXT_SCALE, (127,255,127), TEXT_THICKNESS, cv2.LINE_AA)
+    
+
+
+    # print("Length: ", len(contours_array_coordinate))
+
+
+    cv2.imshow("Temp", blank_image)
 
     # Shows image
     cv2.imshow("Graph Node Edges", graph_edges)
@@ -99,10 +132,6 @@ def contour_identify_shape(graph_shapes):
     contours_array_type = []
 
     for contour in contours:
-        if i == 0:
-            i = 1
-            continue
-
         approx = cv2.approxPolyDP(
             contour, 0.01 * cv2.arcLength(contour, True), True)
         
@@ -205,7 +234,6 @@ def getEndpointsfromBox(box):
     else:
         pair2 = boxList[index_minD2], boxList[index_minD2-1]
 
-    print("pairs",pair1, pair2)
     endpt1 = getMidPt(pair1)
     endpt2 = getMidPt(pair2)
     return [endpt1, endpt2]
@@ -250,6 +278,22 @@ def find_edges_endpoints(graph_edges, graph_node):
             # print(box)
     
     return (newMask_ed, endpoint_list)    
+
+def find_closest_node(endpoint_coordinates, node_coords, index):
+    node_coordinates = node_coords[:]
+    
+    if(index != -1):
+        node_coordinates.pop(index)
+    
+    nodes = np.asarray(node_coordinates)
+    dist_2 = np.sum((nodes - endpoint_coordinates)**2, axis=1)
+    
+    min = np.argmin(dist_2)
+
+    if(index > min):
+        return min + 1
+    else:
+        return min
 
 if __name__ == "__main__":
     main()
