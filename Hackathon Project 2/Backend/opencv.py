@@ -51,28 +51,16 @@ def main():
     # Nodes, Members
     skyciv_bridge(contours_array_coordinate, graph_edges_to_index, contours_array_type)
 
-    # Shows image
-    cv2.imshow("Temp", blank_image)
-    cv2.imshow("Graph Node Edges", graph_edges)
-    cv2.imshow("Graph Node Mask Shape", graph_shapes)
-    cv2.imshow("Graph Edges After Parsing", graph_edges_parsed)
+    # # Shows image
+    # cv2.imshow("Temp", blank_image)
+    # cv2.imshow("Graph Node Edges", graph_edges)
+    # cv2.imshow("Graph Node Mask Shape", graph_shapes)
+    # cv2.imshow("Graph Edges After Parsing", graph_edges_parsed)
 
 
-    cv2.waitKey(0)
+    # cv2.waitKey(0)
 
-    cv2.destroyAllWindows()
-
-
-# Edge detection
-
-# Edges exist as well, we need to find how edges connect and end
-# later we'll try to find which node it cfonnects to
-
-# Two end points are then matched to their closest node region to determine the two end nodes, furthermore since we have to end points, we know that the whole line is connected
-# we can just walk along the neighboring pixels from one end point to the other to botain the edge path
-
-# do to pruning step, we've pruned the actual end point
-# we dialatte them until we find an intersection
+    # cv2.destroyAllWindows()
 
 def find_contour_index(mask, kernel):
     contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
