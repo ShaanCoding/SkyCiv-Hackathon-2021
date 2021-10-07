@@ -6,7 +6,7 @@ from skimage.morphology import skeletonize
 
 import skyciv
 
-def main(image):
+def main():
     image = cv2.imread("./Test-2.png")
 
     # Preprocessing
@@ -50,7 +50,7 @@ def main(image):
         cv2.putText(blank_image, "Index: " + str(i), contours_array_coordinate[i], cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
     # Nodes, Members
-    skyciv_bridge(contours_array_coordinate, graph_edges_to_index, contours_array_type)
+    return skyciv_bridge(contours_array_coordinate, graph_edges_to_index, contours_array_type)
 
 def find_contour_index(mask, kernel):
     contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -306,4 +306,4 @@ def skyciv_bridge(nodes, member, type):
 
     res = ao.request()
 
-    print(res["response"]["msg"])
+    return res["response"]["data"]
