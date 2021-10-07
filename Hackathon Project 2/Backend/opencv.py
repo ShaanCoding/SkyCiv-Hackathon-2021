@@ -33,52 +33,22 @@ def main():
     
     (graph_edges_parsed, endpoints_list) = find_edges_endpoints(graph_edges, graph_node)
 
-    graph_edges_to_index = []
+    graph_edges_to_index = find_nodes(endpoints_list, contours_array_coordinate)
 
-    for i in range(0, len(endpoints_list)):
-            # Can't be the same node
-            closest_node_one = find_closest_node(endpoints_list[i][0], contours_array_coordinate, -1)
-            closest_node_two = find_closest_node(endpoints_list[i][1], contours_array_coordinate, closest_node_one) + 1
-            graph_edges_to_index.append((closest_node_one, closest_node_two))
-
-    print("Node Coordinate List", contours_array_coordinate)
-    print("Node Edges", endpoints_list)
+    # Prep blank image
     blank_image = np.zeros(image.shape, np.uint8)
-
-    # for i in range(0, len(endpoints_list)):
-    #     cv2.circle(blank_image, endpoints_list[i][0], radius=2, color=(255, 0, 0), thickness=2)
-    #     cv2.putText(blank_image, str(i), endpoints_list[i][0], cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-    #     cv2.circle(blank_image, endpoints_list[i][1], radius=2, color=(0, 0, 255), thickness=2)
-    #     cv2.putText(blank_image, str(i), endpoints_list[i][1], cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
         
     for i in range(0, len(graph_edges_to_index)):
         graph_edges_index_one = graph_edges_to_index[i]
         cv2.line(blank_image, contours_array_coordinate[graph_edges_index_one[0]], contours_array_coordinate[graph_edges_index_one[1]], color=(255, 255, 132), thickness=5)
 
-    print("Node Edges Index", graph_edges_to_index)
-    
-
-
     for i in range(0, len(contours_array_coordinate)):
         cv2.circle(blank_image, contours_array_coordinate[i], radius=2, color=(77,166,255), thickness=2)
         cv2.putText(blank_image, "Index: " + str(i), contours_array_coordinate[i], cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
-        # TEXT_FACE = cv2.FONT_HERSHEY_DUPLEX
-        # TEXT_SCALE = 1.5
-        # TEXT_THICKNESS = 2
-        # TEXT = "0"
-        # text_size, _ = cv2.getTextSize(TEXT, TEXT_FACE, TEXT_SCALE, TEXT_THICKNESS)
-        # text_origin = (CENTER[0] - text_size[0] / 2, CENTER[1] + text_size[1] / 2)
-        # cv2.putText(img, TEXT, text_origin, TEXT_FACE, TEXT_SCALE, (127,255,127), TEXT_THICKNESS, cv2.LINE_AA)
-    
-
-
-    # print("Length: ", len(contours_array_coordinate))
-
-
-    cv2.imshow("Temp", blank_image)
 
     # Shows image
+    cv2.imshow("Temp", blank_image)
     cv2.imshow("Graph Node Edges", graph_edges)
     cv2.imshow("Graph Node Mask Shape", graph_shapes)
     cv2.imshow("Graph Edges After Parsing", graph_edges_parsed)
@@ -302,6 +272,17 @@ def find_closest_node(endpoint_coordinates, node_coords, index):
         return min + 1
     else:
         return min
+
+def find_nodes(endpoints_list, contours_array_coordinate):
+    graph_edges_to_index = []
+
+    for i in range(0, len(endpoints_list)):
+            # Can't be the same node
+            closest_node_one = find_closest_node(endpoints_list[i][0], contours_array_coordinate, -1)
+            closest_node_two = find_closest_node(endpoints_list[i][1], contours_array_coordinate, closest_node_one) + 1
+            graph_edges_to_index.append((closest_node_one, closest_node_two))
+
+    return graph_edges_to_index
 
 if __name__ == "__main__":
     main()
