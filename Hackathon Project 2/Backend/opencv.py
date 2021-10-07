@@ -45,11 +45,11 @@ def main():
     print("Node Edges", endpoints_list)
     blank_image = np.zeros(image.shape, np.uint8)
 
-    for i in range(0, len(endpoints_list)):
-        cv2.circle(blank_image, endpoints_list[i][0], radius=2, color=(255, 0, 0), thickness=2)
-        cv2.putText(blank_image, str(i), endpoints_list[i][0], cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
-        cv2.circle(blank_image, endpoints_list[i][1], radius=2, color=(0, 0, 255), thickness=2)
-        cv2.putText(blank_image, str(i), endpoints_list[i][1], cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+    # for i in range(0, len(endpoints_list)):
+    #     cv2.circle(blank_image, endpoints_list[i][0], radius=2, color=(255, 0, 0), thickness=2)
+    #     cv2.putText(blank_image, str(i), endpoints_list[i][0], cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+    #     cv2.circle(blank_image, endpoints_list[i][1], radius=2, color=(0, 0, 255), thickness=2)
+    #     cv2.putText(blank_image, str(i), endpoints_list[i][1], cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
         
     for i in range(0, len(graph_edges_to_index)):
         graph_edges_index_one = graph_edges_to_index[i]
