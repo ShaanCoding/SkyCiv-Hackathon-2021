@@ -29,26 +29,19 @@ def main():
     graph_edges = mask - graph_node
     
     graph_shapes = graph_node.copy()
-    (contours, contours_array_type, contours_array_coordinate) = contour_identify_shape(graph_shapes)
-
-    # for i in range(0, len(contours_array_type)):
-        # print(contours_array_type[i] + " " + np.array2string(contours_array_coordinate[i]))
-
-    graph_edges_skeleton = morpological_skeletonization(graph_edges)
-
-
-    endpoints_list = find_edges_endpoints(graph_edges, graph_node)
-    print("Endpoint list", endpoints_list)
-    # Shows image
-    cv2.imshow("Example", mask)
-    cv2.imshow("Graph Node Mask", graph_node)
+    (contours_array_type, contours_array_coordinate) = contour_identify_shape(graph_shapes)
     
+    (graph_edges_parsed, endpoints_list) = find_edges_endpoints(graph_edges, graph_node)
+
+    print("Node Coordinate List", contours_array_coordinate)
+    print("Contours Type:", contours_array_type)
+    print("Endpoint list", endpoints_list)
+
+    # Shows image
     cv2.imshow("Graph Node Edges", graph_edges)
-    cv2.imshow("Graph Node Skeleton", graph_edges_skeleton)
+    cv2.imshow("Graph Node Mask Shape", graph_shapes)
+    cv2.imshow("Graph Edges After Parsing", graph_edges_parsed)
 
-
-
-    # cv2.imshow("Graph Node Mask Shape", graph_shapes)
 
     cv2.waitKey(0)
 
@@ -103,6 +96,7 @@ def contour_identify_shape(graph_shapes):
     contours, hierarchy = cv2.findContours(graph_shapes, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     contours_array = []
+    contours_array_type = []
 
     for contour in contours:
         if i == 0:
@@ -124,37 +118,17 @@ def contour_identify_shape(graph_shapes):
         if len(approx) >= 3 and len(approx) <= 6:
             cv2.putText(graph_shapes, 'Triangle', (x, y),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-            contours_array.append("Triangle")
+            contours_array_type.append("Triangle")
     
         else:
             cv2.putText(graph_shapes, 'circle', (x, y),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-            contours_array.append("Circle")
+            contours_array_type.append("Circle")
+
+        x,y,w,h = cv2.boundingRect(contour)
+        contours_array.append((x, y))
     
-    return (contours, contours_array, np.vstack(contours).squeeze())
-
-def morpological_skeletonization(graph_edges):
-    img = graph_edges.copy()
-
-    size = np.size(img)
-    skeleton = np.zeros(img.shape, np.uint8)
-
-    element = cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3))
-
-    done = False
-
-    while(not done):
-        eroded = cv2.erode(img, element)
-        temp = cv2.dilate(eroded, element)
-        temp = cv2.subtract(img, temp)
-        skeleton = cv2.bitwise_or(skeleton, temp)
-        img = eroded.copy()
-
-        zeros = size - cv2.countNonZero(img)
-        if (zeros == size):
-            done = True
-
-    return skeleton
+    return (contours_array_type, contours_array)
 
 def list_ports():
     is_working = True
@@ -191,7 +165,6 @@ def getMidPt(pairPnt):
 
     midPt = [int((x1+x2)/2), int((y1+y2)/2)]
     return midPt
-
 
 def getEndpointsfromBox(box):
     boxList = box.tolist()
@@ -237,7 +210,6 @@ def getEndpointsfromBox(box):
     endpt2 = getMidPt(pair2)
     return [endpt1, endpt2]
 
-
 def find_edges_endpoints(graph_edges, graph_node):
     cv2.imwrite('temp_skeleton.png',graph_edges)
     skeleton_img_new = cv2.imread('temp_skeleton.png')
@@ -277,9 +249,7 @@ def find_edges_endpoints(graph_edges, graph_node):
             # print(endpoints)
             # print(box)
     
-    cv2.imshow("Edges Endpoints",newMask_ed)
-
-    return endpoint_list    
+    return (newMask_ed, endpoint_list)    
 
 if __name__ == "__main__":
     main()
