@@ -1,6 +1,7 @@
 import cv2
 from PIL import Image
 import numpy as np
+from skimage.morphology import skeletonize
 
 def main():
     image = cv2.imread("./test-image-3.png")
@@ -40,7 +41,8 @@ def main():
 
     # skeleton_coordinates = convert_skeleton_to_coordinates(graph_edges_skeleton)
 
-
+    endpoints_list = find_edges_endpoints(graph_edges, graph_node)
+    print("Endpoint list", endpoints_list)
     # Shows image
     cv2.imshow("Example", mask)
     cv2.imshow("Graph Node Mask", graph_node)
@@ -50,7 +52,7 @@ def main():
 
 
 
-    cv2.imshow("Graph Node Mask Shape", graph_shapes)
+    # cv2.imshow("Graph Node Mask Shape", graph_shapes)
 
     cv2.waitKey(0)
 
@@ -229,6 +231,109 @@ def list_ports():
                 available_ports.append(dev_port)
         dev_port +=1
     return available_ports,working_ports
+
+def find_distance_two_points(pt1, pt2):
+    x1,y1 = pt1
+    x2, y2 = pt2
+    dist = ((x2-x1)**2 + (y2-y1)**2 )**(1/2)
+    return dist
+
+def getMidPt(pairPnt):
+    x1,y1 = pairPnt[0]
+    x2,y2 = pairPnt[1]
+
+    midPt = [int((x1+x2)/2), int((y1+y2)/2)]
+    return midPt
+
+
+def getEndpointsfromBox(box):
+    boxList = box.tolist()
+    dist_list = []
+    for i, pt in enumerate(boxList):
+        if i == 0:
+            pt1 = pt
+            pt2 = boxList[-1]
+        else:
+            pt1 = pt
+            pt2 = boxList[i-1]
+        
+        dist = find_distance_two_points(pt1,pt2)
+        dist_list.append(dist)
+    
+    ## get two least distances
+    dist_list_copy  = dist_list.copy()
+    dist_list_sorted = sorted(dist_list_copy)
+    # print("dist_list",dist_list)
+    # print("dist_list_sorted",dist_list_sorted)
+    minD1, minD2 = dist_list_sorted[0], dist_list_sorted[1]
+    index_minD1 = dist_list.index(minD1)
+    index_minD2 = dist_list.index(minD2)
+    
+    if index_minD1 == index_minD2:
+        indexList = [i for i,x in enumerate(dist_list) if x==minD1]
+        index_minD1 = indexList[0]
+        index_minD1 = indexList[1]
+
+    
+    if index_minD1 ==0:
+        pair1 = boxList[0], boxList[-1]
+    else:
+        pair1 = boxList[index_minD1], boxList[index_minD1-1]
+    
+    if index_minD2 ==0:
+        pair2 = boxList[0], boxList[-1]
+    else:
+        pair2 = boxList[index_minD2], boxList[index_minD2-1]
+
+    print("pairs",pair1, pair2)
+    endpt1 = getMidPt(pair1)
+    endpt2 = getMidPt(pair2)
+    return [endpt1, endpt2]
+
+
+
+def find_edges_endpoints(graph_edges, graph_node):
+    cv2.imwrite('temp_skeleton.png',graph_edges)
+    skeleton_img_new = cv2.imread('temp_skeleton.png')
+    
+    cv2.imshow("skeleton_img",skeleton_img_new)
+    # 2.2 Binarize the skeleton image
+
+    skeleton_processed = skeletonize(skeleton_img_new)
+    gray_skeleton = cv2.cvtColor(skeleton_processed, cv2.COLOR_BGR2GRAY)
+    _, maskSkeleton = cv2.threshold(gray_skeleton, 1,255,0)
+    
+    edges_only = cv2.bitwise_or(maskSkeleton, graph_edges)
+
+    ## WAY 2
+    eroded = cv2.subtract(edges_only,graph_node)
+
+    ## Process for contours
+    contours_ed, heirarchy = cv2.findContours(eroded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE )
+    h_img, w_img = graph_edges.shape[:2]
+    newMask_ed = np.zeros((h_img, w_img,3),np.uint8)
+    endpoint_list = []
+    for cnt_ed in contours_ed:
+        area = cv2.contourArea(cnt_ed)
+        if area >8:
+            # print('area',area)          
+            newMask_ed = cv2.drawContours(newMask_ed, cnt_ed, -1,(0,255,0),1)
+            rect = cv2.minAreaRect(cnt_ed)
+            box = cv2.boxPoints(rect)
+            box = np.int0(box)
+            angle = rect[2]
+            
+            endpoints = getEndpointsfromBox(box)
+            endpoint_list.append(endpoints)
+            # newMask_ed = cv2.rectangle(newMask_ed,[box],(255,0,0),-1)
+            newMask_ed = cv2.circle(newMask_ed,tuple(endpoints[0]),3,(0,0,255),-1)
+            newMask_ed = cv2.circle(newMask_ed,tuple(endpoints[1]),3,(0,0,255),-1)
+            # print(endpoints)
+            # print(box)
+    
+    cv2.imshow("Edges Endpoints",newMask_ed)
+
+    return endpoint_list    
 
 if __name__ == "__main__":
     main()
