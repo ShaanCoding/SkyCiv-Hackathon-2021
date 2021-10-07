@@ -69,16 +69,7 @@ jQuery(document).ready(function () {
 
   // Add custom functions to the application
   app.customFunction = function () {
-    console.log("The custom function was invoked. Showing notification!");
-
-    // Show a notification
-    SKYCIV.utils.alert.sideNotify({
-      title: "Success ✅",
-      body: "You can let the user know what is happening.",
-      time: 5000,
-      auto_hide: true,
-      theme: "dark",
-    });
+    
   };
 
   app.secondCustomFunction = function () {

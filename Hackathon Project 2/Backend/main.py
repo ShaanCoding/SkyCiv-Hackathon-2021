@@ -5,7 +5,11 @@ from flask_restful import Resource, Api, reqparse
 import werkzeug
 import cv2
 import numpy as np
+import warnings
+from opencv import main
 
+
+warnings.filterwarnings('ignore')
 app = Flask(__name__)
 api = Api(app)
 
@@ -25,16 +29,11 @@ class SaveImage(Resource):
         npimg = np.fromstring(stream, np.uint8)
         # convert numpy array to image
         img = cv2.imdecode(npimg, cv2.IMREAD_UNCHANGED)
-        # cv2.imwrite("D:/GitHub/SkyCiv-Hackathon-2021/Hackathon Project 2/test.png", img)
-        print(img)
 
-class GetMyIP(Resource):
-    def get():
-        args = Request
-        return jsonify({'ip': request.remote_addr}), 200
-
+        main(img)
+        return "Success"
+        
 api.add_resource(SaveImage, '/image')
-app.route("/get_my_ip", methods=["GET"])
 
 if __name__ == '__main__':
     app.run(debug=True)

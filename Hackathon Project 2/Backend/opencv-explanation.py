@@ -1,4 +1,3 @@
-from http.client import responses
 import cv2
 from PIL import Image
 import numpy as np
@@ -6,7 +5,7 @@ from skimage.morphology import skeletonize
 
 import skyciv
 
-def main(image):
+def main():
     image = cv2.imread("./Test-2.png")
 
     # Preprocessing
@@ -51,6 +50,17 @@ def main(image):
 
     # Nodes, Members
     skyciv_bridge(contours_array_coordinate, graph_edges_to_index, contours_array_type)
+
+    # Shows image
+    cv2.imshow("Temp", blank_image)
+    cv2.imshow("Graph Node Edges", graph_edges)
+    cv2.imshow("Graph Node Mask Shape", graph_shapes)
+    cv2.imshow("Graph Edges After Parsing", graph_edges_parsed)
+
+
+    cv2.waitKey(0)
+
+    cv2.destroyAllWindows()
 
 def find_contour_index(mask, kernel):
     contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -202,6 +212,7 @@ def find_edges_endpoints(graph_edges, graph_node):
     cv2.imwrite('temp_skeleton.png',graph_edges)
     skeleton_img_new = cv2.imread('temp_skeleton.png')
     
+    cv2.imshow("skeleton_img",skeleton_img_new)
     # 2.2 Binarize the skeleton image
 
     skeleton_processed = skeletonize(skeleton_img_new)
@@ -306,4 +317,9 @@ def skyciv_bridge(nodes, member, type):
 
     res = ao.request()
 
-    print(res["response"]["msg"])
+    print(res["response"])
+
+if __name__ == "__main__":
+    main()
+
+
