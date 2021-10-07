@@ -3,6 +3,8 @@ from PIL import Image
 import numpy as np
 from skimage.morphology import skeletonize
 
+import skyciv
+
 def main():
     image = cv2.imread("./Test-2.png")
 
@@ -39,13 +41,15 @@ def main():
     blank_image = np.zeros(image.shape, np.uint8)
         
     for i in range(0, len(graph_edges_to_index)):
-        graph_edges_index_one = graph_edges_to_index[i]
-        cv2.line(blank_image, contours_array_coordinate[graph_edges_index_one[0]], contours_array_coordinate[graph_edges_index_one[1]], color=(255, 255, 132), thickness=5)
+        graph_edges_index = graph_edges_to_index[i]
+        cv2.line(blank_image, contours_array_coordinate[graph_edges_index[0]], contours_array_coordinate[graph_edges_index[1]], color=(255, 255, 132), thickness=5)
 
     for i in range(0, len(contours_array_coordinate)):
         cv2.circle(blank_image, contours_array_coordinate[i], radius=2, color=(77,166,255), thickness=2)
         cv2.putText(blank_image, "Index: " + str(i), contours_array_coordinate[i], cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
+    # Nodes, Members
+    skyciv_bridge(contours_array_coordinate, graph_edges_to_index, contours_array_type)
 
     # Shows image
     cv2.imshow("Temp", blank_image)
@@ -123,14 +127,14 @@ def contour_identify_shape(graph_shapes):
     
         # putting shape name at center of each shape
         if len(approx) >= 3 and len(approx) <= 6:
-            cv2.putText(graph_shapes, 'Triangle', (x, y),
+            cv2.putText(graph_shapes, 'triangle', (x, y),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-            contours_array_type.append("Triangle")
+            contours_array_type.append("triangle")
     
         else:
             cv2.putText(graph_shapes, 'circle', (x, y),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-            contours_array_type.append("Circle")
+            contours_array_type.append("circle")
 
         x,y,w,h = cv2.boundingRect(contour)
         contours_array.append((x, y))
@@ -283,6 +287,49 @@ def find_nodes(endpoints_list, contours_array_coordinate):
             graph_edges_to_index.append((closest_node_one, closest_node_two))
 
     return graph_edges_to_index
+
+def skyciv_bridge(nodes, member, type):
+    coordinates_transform = 100
+
+    # Create an instance of the Model class
+    model = skyciv.Model("metric")
+
+    # Nodes
+    for i in range(0, len(nodes)):
+        model.nodes.add(-(nodes[i][0] / coordinates_transform), -(nodes[i][1] / coordinates_transform), 0)
+
+    model.materials.add("Structural Steel")
+    model.sections.add_library_section(skyciv.sections.Australian_Steel_300_Grade_CHS_Grade_350_101_6x3_2_CHS, 1)
+
+    # Members
+    for i in range(0, len(member)):
+        model.members.add(int(member[i][0] + 1), int(member[i][1] + 1), 1)
+
+        if(type[i] == "triangle"):
+            model.supports.add(i + 1, "FFFFFF")
+
+    # Create an API Object
+    ao = skyciv.ApiObject()
+
+    # Set auth
+
+    # Reads file
+    f = open("./authkey.txt", "r")
+    lines = f.readlines()
+
+    ao.auth.username = lines[0]
+    ao.auth.key = lines[1]
+
+    # Set functions
+    ao.functions.add("S3D.session.start", {"keep_open": True})
+    ao.functions.add("S3D.model.set", {"s3d_model": model})
+    # Uncomment the next line to run a solve as well.
+    # ao.functions.add("S3D.model.solve", {"analysis_type": "linear"})
+    ao.functions.add("S3D.file.save", {"name": "skyciv-hackathon-1", "path": "SkyCiv-Hackathon"})
+
+    res = ao.request()
+
+    print(res["response"])
 
 if __name__ == "__main__":
     main()
