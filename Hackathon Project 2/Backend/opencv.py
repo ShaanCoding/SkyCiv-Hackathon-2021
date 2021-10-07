@@ -36,10 +36,6 @@ def main():
 
     graph_edges_skeleton = morpological_skeletonization(graph_edges)
 
-    coordinates = find_intersecting_contours(black_white, graph_node, graph_edges_skeleton)
-    print(coordinates)
-
-    # skeleton_coordinates = convert_skeleton_to_coordinates(graph_edges_skeleton)
 
     endpoints_list = find_edges_endpoints(graph_edges, graph_node)
     print("Endpoint list", endpoints_list)
@@ -160,55 +156,6 @@ def morpological_skeletonization(graph_edges):
 
     return skeleton
 
-# My implementation of attempting to find contour coordiantes
-def convert_skeleton_to_coordinates(skeleton):
-    # https://stackoverflow.com/questions/26537313/how-can-i-find-endpoints-of-binary-skeleton-image-in-opencv
-
-    img = skeleton.copy()
-
-    (rows, cols) = np.nonzero(img)
-
-    # Initialize empty list of coordinates
-    skel_coords = []
-
-    # For each non-zero pixel
-    for (r,c) in zip(rows, cols):
-        # Extract an 8-connected neighbourhood
-        (col_neigh,row_neigh) = np.meshgrid(np.array([c-1,c,c+1]), np.array([r-1,r,r+1]))
-
-        # Cast to int to index into image
-        col_neigh = col_neigh.astype('int')
-        row_neigh = row_neigh.astype('int')
-
-        # Convert into a single 1D array and check for non-zero locations
-        pix_neighbourhood = img[row_neigh,col_neigh].ravel() != 0
-
-        # If the number of non-zero locations equals 2, add this to 
-        # our list of co-ordinates
-        if np.sum(pix_neighbourhood) == 2:
-            skel_coords.append((r,c))
-    return skel_coords
-
-def find_intersecting_contours(original_image, graph_node, graph_edges_skeleton):
-    contours_graph_node, hierarchy_graph_node = cv2.findContours(graph_node, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    contours_graph_edges, hierarchy_graph_edges = cv2.findContours(graph_edges_skeleton, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    
-    contours = [contours_graph_node, contours_graph_edges]
-
-    # Create image filled with zeros
-    zeroes = np.zeros(original_image.shape[0:2])
-
-    # Copy each contour into it's own image and fill it with '1'
-    image1 = cv2.drawContours(zeroes.copy(), contours[0], 0, 1)
-    image2 = cv2.drawContours(zeroes.copy(), contours[1], 1, 1)
-
-    # Use the logical AND operator on two images
-    intersection = np.logical_and(image1, image2)
-
-    # Check if there was a '1' in the intersection
-    return intersection.any()
-# End of implementation
-
 def list_ports():
     is_working = True
     dev_port = 0
@@ -289,7 +236,6 @@ def getEndpointsfromBox(box):
     endpt1 = getMidPt(pair1)
     endpt2 = getMidPt(pair2)
     return [endpt1, endpt2]
-
 
 
 def find_edges_endpoints(graph_edges, graph_node):
