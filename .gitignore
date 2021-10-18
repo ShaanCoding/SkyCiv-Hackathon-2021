@@ -86,3 +86,6 @@ typings/
 
 # DynamoDB Local files
 .dynamodb/
+
+# Secret Keys
+Hackathon Project 2/Backend/authkey.txt
