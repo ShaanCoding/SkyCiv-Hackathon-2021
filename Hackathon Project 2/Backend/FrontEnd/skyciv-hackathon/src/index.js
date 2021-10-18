@@ -53,7 +53,7 @@ class App extends Component {
 
   render() {
     return (
-      <Segment style={{ padding: "5em 1em" }} vertical>
+      <Segment style={{ padding: "5em 20%" }} vertical>
         <Divider horizontal>SKYCIV BRIDGE SCANNER</Divider>
         <Segment style={{}}>
           <Message>
